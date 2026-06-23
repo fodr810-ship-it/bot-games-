@@ -4,12 +4,13 @@ import os
 import sys
 import asyncio
 import io
+
+# حل مشكلة تشفير النصوص في بعض الـ Terminals
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
 
 # حل مشكلة الـ Event Loop الخاص بالـ WebSockets في أنظمة Windows لبايثون الحديث
 if sys.platform == 'win32':
     asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
-
 
 script_dir = os.path.dirname(os.path.abspath(__file__))
 os.chdir(script_dir)
@@ -17,14 +18,14 @@ if script_dir not in sys.path:
     sys.path.insert(0, script_dir)
 
 # ==================== إعدادات البوت والسيرفر ====================
-bot.run(os.getenv("DISCORD_TOKEN"))# توكن البوت الخاص بك
-GUILD_ID = 1439839910172295303  # 👈 ضع هنا آيدي سيرفرك الحقيقي لفرض المزامنة الإجبارية
+GUILD_ID = 1439839910172295303  # آيدي سيرفرك لفرض المزامنة الإجبارية
 # =============================================================
 
 intents = discord.Intents.default()
 intents.message_content = True  
 intents.guilds = True
 
+# تعريف البوت أولاً في مكان صحيح ليفهمه الكود
 bot = commands.Bot(command_prefix="!", intents=intents)
 
 @bot.event
@@ -61,7 +62,7 @@ async def main():
         await bot.load_extension("suggestion_cog")
         await bot.load_extension("embed_maker_cog")
         await bot.load_extension("challeng_cog")
-        await bot.load_extension("stats_cog") # <--- السطر الجديد لتشغيل أمر !sts
+        await bot.load_extension("stats_cog")
         await bot.load_extension("say_cog")
         await bot.load_extension("antmw_cog")
         await bot.load_extension("clear_cog")
@@ -71,6 +72,11 @@ async def main():
         await bot.load_extension("mu_cog")
         await bot.load_extension("mute_cog")
         await bot.load_extension("tts_cog")
-        await bot.start(DISCORD_TOKEN)
+        
+        # جلب التوكن بشكل آمن وتشغيل البوت
+        token = os.getenv("DISCORD_TOKEN")
+        await bot.start(token)
 
-client.run(os.getenv("DISCORD_TOKEN"))
+# تشغيل الملف بالطريقة الصحيحة والحديثة للـ async
+if __name__ == "__main__":
+    asyncio.run(main())
