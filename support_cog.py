@@ -18,7 +18,7 @@ SUPPORT_ROLE_ID = 1517019560690323516
 
 
 
-client = genai.Client(api_key=GEMINI_API_KEY)
+
 
 user_chats = {}
 
