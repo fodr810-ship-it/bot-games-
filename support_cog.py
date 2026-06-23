@@ -1,12 +1,9 @@
 import discord
 from discord.ext import commands
-
 from discord.ui import Button, View
-
 from google import genai
-
 import sqlite3
-
+import os
 
 
 # ==================== إعدادات الـ API والروم ====================
