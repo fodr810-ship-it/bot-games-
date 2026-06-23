@@ -73,4 +73,4 @@ async def main():
         await bot.load_extension("tts_cog")
         await bot.start(DISCORD_TOKEN)
 
-asyncio.run(main())
+client.run(os.getenv("DISCORD_TOKEN"))
