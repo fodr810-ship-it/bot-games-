@@ -4,6 +4,14 @@ import os
 import sys
 import asyncio
 import io
+# ---- أضف هذا الكود تحت الـ imports مباشرة ----
+if not discord.opus.is_loaded():
+    try:
+        discord.opus.load_opus('libopus.so.0')
+        print("✅ Success: Loaded Opus voice library successfully.")
+    except Exception as e:
+        print(f"⚠️ Warning: Could not load Opus library manually: {e}")
+# ---------------------------------------------
 
 # حل مشكلة تشفير النصوص في بعض الـ Terminals
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
