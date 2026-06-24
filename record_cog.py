@@ -78,5 +78,6 @@ class VoiceRecorder(commands.Cog):
         await vc.disconnect()
         await ctx.send("🛑 تم إيقاف التسجيل بنجاح. جاري الرفع إلى روم اللوق...")
 
-def setup(bot):
-    bot.add_cog(VoiceRecorder(bot))
+#  الشكل الجديد الصحيح
+async def setup(bot):
+    await bot.add_cog(VoiceRecorder(bot))
