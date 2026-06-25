@@ -14,7 +14,7 @@ class DownloadCustomView(discord.ui.View):
 
     @discord.ui.button(label="تنزيل", style=discord.ButtonStyle.secondary, custom_id="download_custom_btn", emoji="⬇️")
     async def download_btn(self, interaction: discord.Interaction, button: discord.ui.Button):
-        # الرسالة التي ستظهر للشخص الذي ضغط على الزر فقط
+        # الرسالة التي ستظهر للشخص الذي ضغط على الزر فقط (مخفية عن البقية)
         msg = (
             f"**تم استخراج الروابط بنجاح!** 🖼️\n"
             f"**صاحب الصور الأصلية:** {self.uploader.mention}\n\n"
@@ -22,20 +22,16 @@ class DownloadCustomView(discord.ui.View):
             f"**البنر:** {self.banner_url}"
         )
         
-        # إرسال رد خاص (Ephemeral) يظهر فقط للمستخدم الذي ضغط على الزر
         await interaction.response.send_message(content=msg, ephemeral=True)
+
 
 class CustomImageSystem(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         
-        # 🟢 أيدي الروم الذي سيتم إرسال الصورتين فيه لدمجها
+        # 🟢 أيدي الروم الذي سيتم إرسال الصورتين فيه لدمجها ومراقبته
         self.SOURCE_CHANNEL_ID = 1519058537597108407  
-        
-        # 🟢 أيدي الروم الذي سترسل فيه الصور عند الضغط على زر التنزيل
-        self.TARGET_CHANNEL_ID = 1519058537597108407  
 
-    # نفس دالة التصميم الخاصة بك بالضبط (المرتبة)
     def create_image_sync(self, banner_bytes, avatar_bytes):
         canvas_w, canvas_h = 900, 500
         
@@ -97,13 +93,12 @@ class CustomImageSystem(commands.Cog):
                 buffer = await asyncio.to_thread(self.create_image_sync, banner_bytes, avatar_bytes)
                 image_file = discord.File(fp=buffer, filename="custom_showcase.png")
                 
-                # إنشاء الزر
+                # تم إصلاح الاستدعاء هنا وحذف المتغير الزائد الذي سبب المشكلة
                 view = DownloadCustomView(
                     bot=self.bot,
                     uploader=message.author,
                     avatar_url=avatar_attach.url,
-                    banner_url=banner_attach.url,
-                    target_channel_id=self.TARGET_CHANNEL_ID
+                    banner_url=banner_attach.url
                 )
                 
                 # إرسال النص مع الصورة والزر
@@ -117,7 +112,7 @@ class CustomImageSystem(commands.Cog):
                 await message.add_reaction("✅")
                 
             except Exception as e:
-                print(f"حدث خطأ: {e}")
+                print(f"حدث خطأ أثناء المعالجة: {e}")
                 await message.remove_reaction("⏳", self.bot.user)
                 await message.add_reaction("❌")
 
