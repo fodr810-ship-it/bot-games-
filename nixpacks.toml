@@ -1,4 +1,0 @@
-providers = ["python"]
-
-[setup]
-pkgs = ["python3", "gcc", "ffmpeg", "libopus-dev", "make"]
