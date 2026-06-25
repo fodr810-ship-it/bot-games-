@@ -108,53 +108,68 @@ class CustomImageSystem(commands.Cog):
         buffer.seek(0)
         return buffer
 
-    @commands.Cog.listener()
+   @commands.Cog.listener()
     async def on_message(self, message):
-        # تجاهل رسائل البوتات والرسائل التي ليست في الروم المخصص
-        if message.author.bot or message.channel.id != self.SOURCE_CHANNEL_ID:
+        # تجاهل رسائل البوتات
+        if message.author.bot:
             return
-        
-        # التأكد من أن الرسالة تحتوي على مرفقين (صورتين)
-        if len(message.attachments) == 2:
-            banner_attach = message.attachments[0]
-            avatar_attach = message.attachments[1]
             
-            # التحقق من أن المرفقات عبارة عن صور
-            if not (banner_attach.content_type.startswith('image/') and avatar_attach.content_type.startswith('image/')):
-                return
+        # التحقق من الروم (مع طباعة رسالة إذا استلم الرسالة في الروم الصحيح)
+        if message.channel.id == self.SOURCE_CHANNEL_ID:
+            print(f"📥 [تتبع] استلمت رسالة في الروم المخصص من {message.author.name}")
+            print(f"📎 [تتبع] عدد المرفقات في الرسالة: {len(message.attachments)}")
             
-            await message.add_reaction("⏳")
-            
-            try:
-                banner_bytes = await banner_attach.read()
-                avatar_bytes = await avatar_attach.read()
+            # التأكد من أن الرسالة تحتوي على مرفقين (صورتين)
+            if len(message.attachments) == 2:
+                banner_attach = message.attachments[0]
+                avatar_attach = message.attachments[1]
+                
+                # حماية إضافية: التأكد من أن المرفقات لها صيغة
+                if not banner_attach.content_type or not avatar_attach.content_type:
+                    print("❌ [خطأ] المرفقات لا تحتوي على صيغة معروفة.")
+                    return
+                
+                # التحقق من أن المرفقات عبارة عن صور
+                if not (banner_attach.content_type.startswith('image/') and avatar_attach.content_type.startswith('image/')):
+                    print("❌ [خطأ] الملفات المرفقة ليست صوراً صالحة.")
+                    return
+                
+                print("✅ [نجاح] الصور مطابقة للشروط، جاري المعالجة...")
+                await message.add_reaction("⏳")
+                
+                try:
+                    banner_bytes = await banner_attach.read()
+                    avatar_bytes = await avatar_attach.read()
 
-                # دمج الصور في الخلفية
-                buffer = await asyncio.to_thread(self.create_image_sync, banner_bytes, avatar_bytes)
-                image_file = discord.File(fp=buffer, filename="custom_showcase.png")
-                
-                # إنشاء الزر وإرساله
-                view = DownloadCustomView(
-                    bot=self.bot,
-                    uploader=message.author,
-                    avatar_url=avatar_attach.url,
-                    banner_url=banner_attach.url,
-                    target_channel_id=self.TARGET_CHANNEL_ID
-                )
-                
-                await message.channel.send(
-                    f"✨ **تم تجهيز العرض الخاص بك!** {message.author.mention}",
-                    file=image_file, 
-                    view=view
-                )
-                
-                await message.remove_reaction("⏳", self.bot.user)
-                await message.add_reaction("✅")
-                
-            except Exception as e:
-                print(f"حدث خطأ: {e}")
-                await message.remove_reaction("⏳", self.bot.user)
-                await message.add_reaction("❌")
+                    # دمج الصور في الخلفية
+                    buffer = await asyncio.to_thread(self.create_image_sync, banner_bytes, avatar_bytes)
+                    image_file = discord.File(fp=buffer, filename="custom_showcase.png")
+                    
+                    # إنشاء الزر وإرساله
+                    view = DownloadCustomView(
+                        bot=self.bot,
+                        uploader=message.author,
+                        avatar_url=avatar_attach.url,
+                        banner_url=banner_attach.url,
+                        target_channel_id=self.TARGET_CHANNEL_ID
+                    )
+                    
+                    await message.channel.send(
+                        f"✨ **تم تجهيز العرض الخاص بك!** {message.author.mention}",
+                        file=image_file, 
+                        view=view
+                    )
+                    
+                    await message.remove_reaction("⏳", self.bot.user)
+                    await message.add_reaction("✅")
+                    print("🎉 [نجاح] تم إرسال الصورة بنجاح للروم!")
+                    
+                except Exception as e:
+                    print(f"⚠️ [خطأ داخلي] حدث خطأ أثناء الدمج: {e}")
+                    await message.remove_reaction("⏳", self.bot.user)
+                    await message.add_reaction("❌")
+            else:
+                print("⚠️ [تنبيه] الرسالة لم تحتوي على صورتين بالضبط (ممكن 0 أو 1 أو أكثر). تم التجاهل.")
 
 async def setup(bot):
     await bot.add_cog(CustomImageSystem(bot))
