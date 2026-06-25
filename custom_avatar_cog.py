@@ -108,7 +108,7 @@ class CustomImageSystem(commands.Cog):
         buffer.seek(0)
         return buffer
 
-   @commands.Cog.listener()
+    @commands.Cog.listener()
     async def on_message(self, message):
         # تجاهل رسائل البوتات
         if message.author.bot:
