@@ -1,13 +1,30 @@
+import discord
+from discord.ext import commands
+import asyncio
+import io
+import aiohttp
+from PIL import Image, ImageDraw, ImageFilter
+import os
+
+class DownloadAvatarView(discord.ui.View):
+    def __init__(self, member_name: str, avatar_url: str, banner_url: str = None):
+        super().__init__(timeout=None)
+        self.member_name = member_name
+        self.avatar_url = avatar_url
+        self.banner_url = banner_url
+
+    @discord.ui.button(label="تنزيل", style=discord.ButtonStyle.secondary, custom_id="download_avatar_btn")
+    async def download_btn(self, interaction: discord.Interaction, button: discord.ui.Button):
+        msg = f"**الصور الخاصة بـ {self.member_name}** 🖼️\n\n**الافاتار:**\n{self.avatar_url}\n"
+        msg += f"\n**البنر:**\n{self.banner_url}" if self.banner_url else "\n**البنر:** لا يوجد بنر."
+        await interaction.response.send_message(msg, ephemeral=True)
+
 class AvatarSystem(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.AVATAR_CHANNEL_ID = 1519058537597108407
 
-    # تم حذف دالة on_member_join بالكامل من هنا 
-    # لضمان عدم إرسال أي رسائل عند انضمام الأعضاء
-
     def create_image_sync(self, avatar_bytes, banner_bytes):
-        # ... (بقية الدالة كما هي دون تغيير)
         canvas_w, canvas_h = 900, 500
         if banner_bytes:
             bg_img = Image.open(io.BytesIO(banner_bytes)).convert("RGBA").resize((canvas_w, canvas_h), Image.Resampling.LANCZOS)
@@ -77,3 +94,6 @@ class AvatarSystem(commands.Cog):
                 print(f"حدث خطأ مع {member.name}: {e}")
                 continue
         await ctx.send(f"✅ تمت أرشفة {count} عضواً يمتلكون بنر بنجاح!")
+
+async def setup(bot):
+    await bot.add_cog(AvatarSystem(bot))
