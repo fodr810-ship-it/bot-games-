@@ -82,6 +82,7 @@ async def main():
         await bot.load_extension("avtar_cog")
         await bot.load_extension("custom_avatar_cog")
         await bot.load_extension("auto_cog")
+        await bot.load_extension("autog_cog")
         
         # جلب التوكن بشكل آمن وتشغيل البوت
         token = os.getenv("DISCORD_TOKEN")
