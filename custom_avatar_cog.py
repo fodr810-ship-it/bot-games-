@@ -114,8 +114,9 @@ class CustomImageSystem(commands.Cog):
                     target_channel_id=self.TARGET_CHANNEL_ID
                 )
                 
-                # إرسال الصورة والزر فقط (بدون أي رسالة نصية)
+                # إرسال النص مع الصورة والزر
                 await message.channel.send(
+                    content=f"**From:** {message.author.mention}",
                     file=image_file, 
                     view=view
                 )
