@@ -38,10 +38,10 @@ class CustomImageSystem(commands.Cog):
         self.bot = bot
         
         # 🟢 أيدي الروم الذي سيتم إرسال الصورتين فيه لدمجها
-        self.SOURCE_CHANNEL_ID = 1518210681151688794  
+        self.SOURCE_CHANNEL_ID = 1519058537597108407  
         
         # 🟢 أيدي الروم الذي سترسل فيه الصور عند الضغط على زر التنزيل
-        self.TARGET_CHANNEL_ID = 1517015117160513726  
+        self.TARGET_CHANNEL_ID = 1519058537597108407  
 
     # نفس دالة التصميم الخاصة بك بالضبط (المرتبة)
     def create_image_sync(self, banner_bytes, avatar_bytes):
