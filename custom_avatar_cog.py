@@ -5,33 +5,25 @@ import io
 from PIL import Image, ImageDraw, ImageFilter
 
 class DownloadCustomView(discord.ui.View):
-    def __init__(self, bot, uploader: discord.Member, avatar_url: str, banner_url: str, target_channel_id: int):
+    def __init__(self, bot, uploader: discord.Member, avatar_url: str, banner_url: str):
         super().__init__(timeout=None)
         self.bot = bot
         self.uploader = uploader
         self.avatar_url = avatar_url
         self.banner_url = banner_url
-        self.target_channel_id = target_channel_id
 
     @discord.ui.button(label="تنزيل", style=discord.ButtonStyle.secondary, custom_id="download_custom_btn", emoji="⬇️")
     async def download_btn(self, interaction: discord.Interaction, button: discord.ui.Button):
-        target_channel = self.bot.get_channel(self.target_channel_id)
-        
-        if not target_channel:
-            return await interaction.response.send_message("❌ لم يتم العثور على روم التنزيل، يرجى التأكد من الأيدي.", ephemeral=True)
-        
-        # الرسالة التي ستُرسل في روم التنزيل المخصص
+        # الرسالة التي ستظهر للشخص الذي ضغط على الزر فقط
         msg = (
-            f"**تم سحب الصور بنجاح!** 🖼️\n"
-            f"**بواسطة:** {interaction.user.mention}\n"
+            f"**تم استخراج الروابط بنجاح!** 🖼️\n"
             f"**صاحب الصور الأصلية:** {self.uploader.mention}\n\n"
-            f"**الافاتار:**\n{self.avatar_url}\n\n"
-            f"**البنر:**\n{self.banner_url}"
+            f"**الافاتار:** {self.avatar_url}\n\n"
+            f"**البنر:** {self.banner_url}"
         )
         
-        await target_channel.send(content=msg)
-        await interaction.response.send_message("✅ تم إرسال الصور إلى روم التنزيل المخصص!", ephemeral=True)
-
+        # إرسال رد خاص (Ephemeral) يظهر فقط للمستخدم الذي ضغط على الزر
+        await interaction.response.send_message(content=msg, ephemeral=True)
 
 class CustomImageSystem(commands.Cog):
     def __init__(self, bot):
