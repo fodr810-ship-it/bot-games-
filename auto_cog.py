@@ -29,7 +29,7 @@ class CustomPostImageSystem(commands.Cog):
         self.bot = bot
         
         # 🟢 أيدي روم المنتدى/البوستات الرئيسي الخاص بك
-        self.SOURCE_CHANNEL_ID = 1519058537597108407  
+        self.SOURCE_CHANNEL_ID = 1519745031399805079  
 
     def create_image_sync(self, banner_bytes, avatar_bytes):
         canvas_w, canvas_h = 900, 500
