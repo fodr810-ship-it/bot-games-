@@ -78,6 +78,7 @@ async def main():
         await bot.load_extension("mute_cog")
         await bot.load_extension("tts_cog")
         await bot.load_extension("record_cog")
+        await bot.load_extension("avtar_cog")
         
         # جلب التوكن بشكل آمن وتشغيل البوت
         token = os.getenv("DISCORD_TOKEN")
