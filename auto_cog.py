@@ -14,23 +14,22 @@ class DownloadCustomView(discord.ui.View):
 
     @discord.ui.button(label="تنزيل", style=discord.ButtonStyle.secondary, custom_id="download_custom_btn", emoji="⬇️")
     async def download_btn(self, interaction: discord.Interaction, button: discord.ui.Button):
-        # الرسالة التي ستظهر للشخص الذي ضغط على الزر فقط (مخفية عن البقية)
         msg = (
             f"**تم استخراج الروابط بنجاح!** 🖼️\n"
             f"**صاحب الصور الأصلية:** {self.uploader.mention}\n\n"
             f"**الافاتار:** {self.avatar_url}\n\n"
             f"**البنر:** {self.banner_url}"
         )
-        
         await interaction.response.send_message(content=msg, ephemeral=True)
 
 
-class CustomImageSystem(commands.Cog):
+# 🟢 تم تغيير الاسم هنا إلى CustomPostImageSystem لإنهاء مشكلة الكراش (already loaded)
+class CustomPostImageSystem(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         
-        # 🟢 أيدي الروم الذي سيتم إرسال الصورتين فيه لدمجها ومراقبته
-        self.SOURCE_CHANNEL_ID = 1519725913045078056  
+        # 🟢 أيدي روم المنتدى/البوستات الرئيسي الخاص بك
+        self.SOURCE_CHANNEL_ID = 1519058537597108407  
 
     def create_image_sync(self, banner_bytes, avatar_bytes):
         canvas_w, canvas_h = 900, 500
@@ -68,8 +67,18 @@ class CustomImageSystem(commands.Cog):
 
     @commands.Cog.listener()
     async def on_message(self, message):
-        # تجاهل البوتات والرومات الأخرى
-        if message.author.bot or message.channel.id != self.SOURCE_CHANNEL_ID:
+        # تجاهل البوتات تماماً
+        if message.author.bot:
+            return
+            
+        # 🔥 حل مشكلة البوستات (Threads):
+        # إذا كانت الرسالة مكتوبة داخل بوست، نأخذ آيدي روم المنتدى الرئيسي المحتوي عليه لقراءتها
+        channel_id = message.channel.id
+        if isinstance(message.channel, discord.Thread):
+            channel_id = message.channel.parent_id
+        
+        # التأكد من مطابقة آيدي الروم المستهدف
+        if channel_id != self.SOURCE_CHANNEL_ID:
             return
         
         # التأكد من وجود صورتين بالضبط (البنر أولاً، ثم الأفاتار ثانياً)
@@ -77,10 +86,15 @@ class CustomImageSystem(commands.Cog):
             banner_attach = message.attachments[0]
             avatar_attach = message.attachments[1]
             
-            # التحقق من أن المرفقات عبارة عن صور
-            if not (banner_attach.content_type and avatar_attach.content_type):
-                return
-            if not (banner_attach.content_type.startswith('image/') and avatar_attach.content_type.startswith('image/')):
+            # التحقق الذكي من المرفقات للتأكد من أنها صور فعلياً
+            is_valid_image = False
+            if banner_attach.content_type and avatar_attach.content_type:
+                if banner_attach.content_type.startswith('image/') and avatar_attach.content_type.startswith('image/'):
+                    is_valid_image = True
+            elif banner_attach.filename.lower().endswith(('.png', '.jpg', '.jpeg', '.webp')) and avatar_attach.filename.lower().endswith(('.png', '.jpg', '.jpeg', '.webp')):
+                is_valid_image = True
+
+            if not is_valid_image:
                 return
             
             await message.add_reaction("⏳")
@@ -93,7 +107,6 @@ class CustomImageSystem(commands.Cog):
                 buffer = await asyncio.to_thread(self.create_image_sync, banner_bytes, avatar_bytes)
                 image_file = discord.File(fp=buffer, filename="custom_showcase.png")
                 
-                # تم إصلاح الاستدعاء هنا وحذف المتغير الزائد الذي سبب المشكلة
                 view = DownloadCustomView(
                     bot=self.bot,
                     uploader=message.author,
@@ -101,7 +114,7 @@ class CustomImageSystem(commands.Cog):
                     banner_url=banner_attach.url
                 )
                 
-                # إرسال النص مع الصورة والزر
+                # إرسال النتيجة في نفس المكان (سواء كان روم عادي أو داخل البوست)
                 await message.channel.send(
                     content=f"**From:** {message.author.mention}",
                     file=image_file, 
@@ -113,8 +126,12 @@ class CustomImageSystem(commands.Cog):
                 
             except Exception as e:
                 print(f"حدث خطأ أثناء المعالجة: {e}")
-                await message.remove_reaction("⏳", self.bot.user)
-                await message.add_reaction("❌")
+                try:
+                    await message.remove_reaction("⏳", self.bot.user)
+                    await message.add_reaction("❌")
+                except:
+                    pass
 
 async def setup(bot):
-    await bot.add_cog(CustomImageSystem(bot))
+    # المزامنة مع اسم الكلاس الجديد
+    await bot.add_cog(CustomPostImageSystem(bot))
